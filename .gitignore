@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Environment
+.env
+.env.local
+
+# Storage
+backend/storage/
+*.db
+
+# Build
+.next/
+out/
+build/
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Reports & uploads (generated)
+backend/storage/uploads/*
+backend/storage/reports/*
+backend/storage/visualizations/*
+!backend/storage/.gitkeep
