@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/lib/store';
 import {
   FileText, Download, Loader, Plus, BarChart3, Sparkles,
-  Calendar, Cpu, ChevronRight, RefreshCw, Eye, Brain
+  Calendar, Brain, X, ChevronDown
 } from 'lucide-react';
 
 const fadeUp = (delay = 0) => ({
@@ -14,27 +14,14 @@ const fadeUp = (delay = 0) => ({
 });
 
 const reportTypes = [
-  {
-    id: 'full', label: 'Full Analysis Report',
-    desc: 'Complete report with audit, EDA, visualizations, and insights',
-    icon: BarChart3, color: '#6366f1', formats: ['PDF', 'PPTX'],
-  },
-  {
-    id: 'executive', label: 'Executive Summary',
-    desc: 'High-level business insights and key recommendations',
-    icon: Sparkles, color: '#10b981', formats: ['PDF'],
-  },
-  {
-    id: 'data', label: 'Data Quality Report',
-    desc: 'Detailed data audit, cleaning suggestions, and quality scores',
-    icon: Brain, color: '#3b82f6', formats: ['PDF', 'CSV'],
-  },
+  { id: 'full', label: 'Full Analysis Report', desc: 'Complete report with audit, EDA, visualizations, and insights', icon: BarChart3, color: 'var(--accent)' },
+  { id: 'executive', label: 'Executive Summary', desc: 'High-level business insights and key recommendations', icon: Sparkles, color: 'var(--success)' },
+  { id: 'data', label: 'Data Quality Report', desc: 'Detailed data audit, cleaning suggestions, and quality scores', icon: Brain, color: 'var(--info)' },
 ];
 
 export default function ReportsPage() {
   const { addNotification } = useApp();
   const [reports, setReports] = useState([]);
-  const [datasets, setDatasets] = useState([]);
   const [workflows, setWorkflows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -46,14 +33,9 @@ export default function ReportsPage() {
 
   async function loadData() {
     try {
-      const [rRes, wRes, dRes] = await Promise.all([
-        fetch('/api/reports/'),
-        fetch('/api/workflows/'),
-        fetch('/api/datasets/'),
-      ]);
+      const [rRes, wRes] = await Promise.all([ fetch('/api/reports/'), fetch('/api/workflows/') ]);
       if (rRes.ok) setReports(await rRes.json());
       if (wRes.ok) setWorkflows(await wRes.json());
-      if (dRes.ok) setDatasets(await dRes.json());
     } catch {}
     setLoading(false);
   }
@@ -71,7 +53,6 @@ export default function ReportsPage() {
         body: JSON.stringify({ workflow_id: selectedWorkflow, format: selectedFormat }),
       });
       if (!res.ok) throw new Error('Generation failed');
-      const data = await res.json();
       addNotification('Report generated successfully!', 'success');
       setShowGenerator(false);
       loadData();
@@ -93,19 +74,18 @@ export default function ReportsPage() {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      addNotification('Download failed — backend may not be running', 'error');
+      addNotification('Download failed', 'error');
     }
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xl)', maxWidth: 1000, margin: '0 auto' }}>
+      
       {/* Header */}
-      <motion.div {...fadeUp()} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <motion.div {...fadeUp()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>Reports</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-            Generate and download AI-powered analysis reports
-          </p>
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>Reports</h1>
+          <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>Generate and download AI-powered analysis reports</p>
         </div>
         <button onClick={() => setShowGenerator(p => !p)} className="btn-primary">
           <Plus size={16} /> Generate Report
@@ -115,55 +95,55 @@ export default function ReportsPage() {
       {/* Generator Panel */}
       <AnimatePresence>
         {showGenerator && (
-          <motion.div initial={{ opacity: 0, y: -10, height: 0 }} animate={{ opacity: 1, y: 0, height: 'auto' }}
-            exit={{ opacity: 0, y: -10, height: 0 }} style={{ overflow: 'hidden' }}>
-            <div className="glass-card p-5 space-y-4" style={{ borderLeft: '3px solid var(--accent)' }}>
-              <h3 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                Generate New Report
-              </h3>
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} style={{ overflow: 'hidden' }}>
+            <div className="glass-card" style={{ padding: 24, borderLeft: '3px solid var(--accent)', display: 'flex', flexDirection: 'column', gap: 20, marginBottom: 'var(--space-lg)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>Configure New Report</h3>
+                <button onClick={() => setShowGenerator(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={18} /></button>
+              </div>
 
-              {/* Report types */}
               <div>
-                <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--text-secondary)' }}>Report Type</label>
-                <div className="grid md:grid-cols-3 gap-3">
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Report Type</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
                   {reportTypes.map(rt => (
-                    <div key={rt.id} className="glass-card p-4 cursor-pointer group">
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3 transition-transform group-hover:scale-110"
-                        style={{ background: `${rt.color}12` }}>
-                        <rt.icon size={18} color={rt.color} />
+                    <div key={rt.id} style={{
+                      padding: 16, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)',
+                      background: 'var(--bg-input)', cursor: 'pointer', transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = rt.color}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
+                      <div style={{ width: 32, height: 32, borderRadius: 'var(--radius-sm)', background: 'var(--bg-card-solid)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                        <rt.icon size={16} color={rt.color} />
                       </div>
-                      <p className="text-xs font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{rt.label}</p>
-                      <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{rt.desc}</p>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{rt.label}</p>
+                      <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{rt.desc}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                 <div>
-                  <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>Select Workflow</label>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Source Workflow</label>
                   <select value={selectedWorkflow} onChange={e => setSelectedWorkflow(e.target.value)}
-                    className="w-full p-2.5 rounded-xl text-sm"
-                    style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
-                    <option value="">Choose a workflow...</option>
-                    {workflows.map(w => (
-                      <option key={w.id} value={w.id}>
-                        {w.prompt?.slice(0, 50)} ({w.status})
-                      </option>
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', background: 'var(--bg-input)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: 13, appearance: 'none' }}>
+                    <option value="">Select a completed workflow...</option>
+                    {workflows.filter(w => w.status === 'completed').map(w => (
+                      <option key={w.id} value={w.id}>{w.prompt.slice(0, 50)}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>Format</label>
-                  <div className="flex gap-2">
+                  <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Export Format</label>
+                  <div style={{ display: 'flex', gap: 8 }}>
                     {['pdf', 'pptx', 'html'].map(f => (
-                      <button key={f}
-                        onClick={() => setSelectedFormat(f)}
-                        className="flex-1 py-2.5 rounded-xl text-xs font-semibold uppercase transition-all"
+                      <button key={f} onClick={() => setSelectedFormat(f)}
                         style={{
-                          background: selectedFormat === f ? 'var(--accent)' : 'var(--bg-primary)',
-                          color: selectedFormat === f ? 'white' : 'var(--text-muted)',
+                          flex: 1, padding: '10px', borderRadius: 'var(--radius-md)',
+                          background: selectedFormat === f ? 'var(--accent)' : 'var(--bg-input)',
+                          color: selectedFormat === f ? 'white' : 'var(--text-secondary)',
                           border: `1px solid ${selectedFormat === f ? 'var(--accent)' : 'var(--border)'}`,
+                          fontSize: 13, fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.2s'
                         }}>
                         {f}
                       </button>
@@ -172,10 +152,10 @@ export default function ReportsPage() {
                 </div>
               </div>
 
-              <div className="flex gap-3 justify-end">
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 }}>
                 <button className="btn-secondary" onClick={() => setShowGenerator(false)}>Cancel</button>
                 <button className="btn-primary" onClick={generateReport} disabled={generating}>
-                  {generating ? <Loader size={15} className="animate-spin" /> : <FileText size={15} />}
+                  {generating ? <Loader size={16} className="animate-spin" /> : <FileText size={16} />}
                   {generating ? 'Generating...' : 'Generate Report'}
                 </button>
               </div>
@@ -184,53 +164,38 @@ export default function ReportsPage() {
         )}
       </AnimatePresence>
 
-      {/* Reports list */}
+      {/* Reports List */}
       {loading ? (
-        <div className="text-center py-20">
-          <Loader size={28} className="animate-spin mx-auto mb-3" color="var(--accent)" />
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Loading reports...</p>
-        </div>
+        <div style={{ textAlign: 'center', padding: 80 }}><Loader size={24} className="animate-spin" color="var(--accent)" style={{ margin: '0 auto' }}/></div>
       ) : reports.length > 0 ? (
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {reports.map((r, i) => (
-            <motion.div key={r.id} {...fadeUp(i * 0.05)}
-              className="glass-card p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: 'var(--accent-glow)' }}>
-                <FileText size={18} color="var(--accent)" />
+            <motion.div key={r.id} {...fadeUp(i * 0.05)} className="glass-card" style={{ display: 'flex', alignItems: 'center', padding: 20, gap: 16 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', background: 'var(--accent-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <FileText size={20} color="var(--accent)" />
               </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                  {r.name || `Report #${r.id?.slice(0, 8)}`}
-                </h4>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  <span className="badge badge-accent">{r.format?.toUpperCase()}</span>
-                  <span className="flex items-center gap-1 text-[11px]" style={{ color: 'var(--text-muted)' }}>
-                    <Calendar size={10} /> {new Date(r.created_at).toLocaleDateString()}
-                  </span>
+              <div style={{ flex: 1 }}>
+                <h4 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{r.name || `Report #${r.id.slice(0,8)}`}</h4>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span className="badge" style={{ background: 'var(--bg-input)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>{r.format.toUpperCase()}</span>
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}><Calendar size={12} /> {new Date(r.created_at).toLocaleDateString()}</span>
                 </div>
               </div>
-              <div className="flex gap-2 flex-shrink-0">
-                <button className="btn-secondary text-xs py-1.5 px-3"
-                  onClick={() => downloadReport(r.id, r.format)}>
-                  <Download size={13} /> Download
-                </button>
-              </div>
+              <button className="btn-secondary" onClick={() => downloadReport(r.id, r.format)} style={{ padding: '8px 16px', fontSize: 12 }}>
+                <Download size={14} /> Download
+              </button>
             </motion.div>
           ))}
         </div>
       ) : (
-        <motion.div {...fadeUp(0.2)} className="text-center py-20">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
-            style={{ background: 'var(--accent-glow)' }}>
-            <FileText size={28} color="var(--accent)" />
+        <motion.div {...fadeUp(0.2)} style={{ textAlign: 'center', padding: '80px 20px', border: '1px dashed var(--border)', borderRadius: 'var(--radius-lg)' }}>
+          <div style={{ width: 64, height: 64, borderRadius: 'var(--radius-lg)', background: 'var(--bg-input)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
+            <FileText size={32} color="var(--text-muted)" />
           </div>
-          <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>No reports yet</h3>
-          <p className="text-sm mb-6 max-w-sm mx-auto" style={{ color: 'var(--text-muted)' }}>
-            Run an AI analysis on a dataset, then generate a downloadable report here.
-          </p>
+          <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>No reports yet</h3>
+          <p style={{ fontSize: 14, color: 'var(--text-secondary)', maxWidth: 400, margin: '0 auto 24px auto' }}>Run an AI analysis on a dataset, then generate a downloadable presentation or document here.</p>
           <button className="btn-primary" onClick={() => setShowGenerator(true)}>
-            <Plus size={15} /> Generate First Report
+            <Plus size={16} /> Generate First Report
           </button>
         </motion.div>
       )}

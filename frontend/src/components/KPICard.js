@@ -2,43 +2,45 @@
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
-export default function KPICard({ title, value, icon: Icon, color = '#6366f1', delay = 0, change, subtitle }) {
+export default function KPICard({ title, value, icon: Icon, color = '#6366f1', delay = 0, change }) {
   const isPositive = change >= 0;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay, duration: 0.4, ease: 'easeOut' }}
-      className="kpi-card group"
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.4 }}
+      className="kpi-card"
     >
-      <div className="flex items-start justify-between">
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium mb-3 truncate" style={{ color: 'var(--text-muted)' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div>
+          <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 8 }}>
             {title}
           </p>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+            <span style={{ fontSize: 32, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
               {value ?? 0}
             </span>
             {change !== undefined && change !== null && (
-              <span className="flex items-center gap-0.5 text-xs font-semibold"
-                style={{ color: isPositive ? '#10b981' : '#ef4444' }}>
-                {isPositive
-                  ? <TrendingUp size={11} />
-                  : <TrendingDown size={11} />}
+              <span className="badge" style={{
+                background: isPositive ? 'var(--success-subtle)' : 'var(--danger-subtle)',
+                color: isPositive ? 'var(--success)' : 'var(--danger)'
+              }}>
+                {isPositive ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
                 {Math.abs(change).toFixed(1)}%
               </span>
             )}
           </div>
-          {subtitle && (
-            <p className="text-xs mt-1 truncate" style={{ color: 'var(--text-muted)' }}>{subtitle}</p>
-          )}
         </div>
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ml-3 transition-transform group-hover:scale-110"
-          style={{ background: `${color}12` }}>
-          {Icon && <Icon size={18} color={color} />}
-        </div>
+        {Icon && (
+          <div style={{
+            width: 40, height: 40, borderRadius: 'var(--radius-md)',
+            background: 'var(--bg-card-solid)', border: '1px solid var(--border)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+          }}>
+            <Icon size={20} color={color} />
+          </div>
+        )}
       </div>
     </motion.div>
   );

@@ -1,44 +1,36 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { AppProvider, useApp } from '@/lib/store';
+import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Notifications from '@/components/Notifications';
+import { AppProvider } from '@/lib/store';
 
-function AppShell({ children }) {
-  const { sidebarOpen } = useApp();
-  const [isDesktop, setIsDesktop] = useState(false);
+export default function AppLayout({ children }) {
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const check = () => setIsDesktop(window.innerWidth >= 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
+    setMounted(true);
+    document.documentElement.setAttribute('data-theme', 'dark');
   }, []);
 
-  const marginLeft = isDesktop ? (sidebarOpen ? 240 : 72) : 0;
+  if (!mounted) return null;
 
-  return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
-      <Sidebar />
-      <Notifications />
-      <main
-        style={{
-          marginLeft,
-          transition: 'margin-left 0.2s ease',
-          minHeight: '100vh',
-          padding: isDesktop ? '24px' : '64px 16px 16px',
-        }}
-      >
-        {children}
-      </main>
-    </div>
-  );
-}
-
-export default function DashboardLayout({ children }) {
   return (
     <AppProvider>
-      <AppShell>{children}</AppShell>
+      <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
+        <Sidebar />
+        <main style={{
+          flex: 1, marginLeft: 240, padding: '32px', minHeight: '100vh',
+          transition: 'margin-left 0.2s ease', overflowX: 'hidden'
+        }} className="md:ml-[240px] ml-0">
+          <style dangerouslySetInnerHTML={{__html: `
+            @media (max-width: 768px) {
+              main { margin-left: 0 !important; padding: 16px !important; padding-top: 64px !important; }
+            }
+          `}} />
+          {children}
+        </main>
+        <Notifications />
+      </div>
     </AppProvider>
   );
 }

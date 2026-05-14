@@ -4,47 +4,42 @@ import { motion } from 'framer-motion';
 import { useApp } from '@/lib/store';
 import {
   Settings, Sun, Moon, Bell, Shield, Key,
-  Database, Brain, Sparkles, Check, ChevronRight, Info
+  Database, Brain, Sparkles, Check, Info, Cpu
 } from 'lucide-react';
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0, y: 15 },
   animate: { opacity: 1, y: 0 },
   transition: { delay, duration: 0.4 },
 });
 
 function Section({ title, icon: Icon, children, delay = 0 }) {
   return (
-    <motion.div {...fadeUp(delay)} className="glass-card overflow-hidden">
-      <div className="px-5 py-4 flex items-center gap-2.5"
-        style={{ borderBottom: '1px solid var(--border)' }}>
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-          style={{ background: 'var(--accent-glow)' }}>
-          <Icon size={15} color="var(--accent)" />
+    <motion.div {...fadeUp(delay)} className="glass-card" style={{ overflow: 'hidden' }}>
+      <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ width: 28, height: 28, borderRadius: 'var(--radius-sm)', background: 'var(--bg-input)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Icon size={14} color="var(--text-secondary)" />
         </div>
-        <h3 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{title}</h3>
+        <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{title}</h3>
       </div>
-      <div className="p-5 space-y-4">{children}</div>
+      <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 24 }}>{children}</div>
     </motion.div>
   );
 }
 
 function ToggleRow({ label, desc, value, onChange }) {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
       <div>
-        <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{label}</p>
-        {desc && <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{desc}</p>}
+        <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-primary)' }}>{label}</p>
+        {desc && <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>{desc}</p>}
       </div>
-      <button
-        onClick={() => onChange(!value)}
-        className="relative w-11 h-6 rounded-full transition-all duration-200 flex-shrink-0"
-        style={{ background: value ? 'var(--accent)' : 'var(--bg-primary)' }}>
-        <motion.div
-          animate={{ x: value ? 20 : 2 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-          className="absolute top-1 w-4 h-4 rounded-full"
-          style={{ background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
+      <button onClick={() => onChange(!value)} style={{
+        position: 'relative', width: 44, height: 24, borderRadius: 'var(--radius-full)',
+        background: value ? 'var(--success)' : 'var(--bg-input)', border: 'none', cursor: 'pointer', transition: 'background 0.3s'
+      }}>
+        <motion.div animate={{ x: value ? 22 : 2 }} transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          style={{ position: 'absolute', top: 2, width: 20, height: 20, borderRadius: '50%', background: 'white', boxShadow: 'var(--shadow-sm)' }} />
       </button>
     </div>
   );
@@ -54,7 +49,6 @@ export default function SettingsPage() {
   const { theme, toggleTheme } = useApp();
   const [notifications, setNotifications] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
-  const [darkCharts, setDarkCharts] = useState(true);
   const [apiKey, setApiKey] = useState('');
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -64,149 +58,112 @@ export default function SettingsPage() {
     setTimeout(() => setSaved(false), 2000);
   }
 
-  const themeOptions = [
-    { id: 'dark', label: 'Dark', icon: Moon },
-    { id: 'light', label: 'Light', icon: Sun },
-  ];
-
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xl)', maxWidth: 800, margin: '0 auto' }}>
+      
       {/* Header */}
       <motion.div {...fadeUp()}>
-        <h1 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>Settings</h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-          Configure your DataAnalystAI platform preferences
-        </p>
+        <h1 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>Settings</h1>
+        <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>Configure your platform preferences and API keys</p>
       </motion.div>
 
       {/* Appearance */}
       <Section title="Appearance" icon={Sun} delay={0.05}>
         <div>
-          <p className="text-sm font-medium mb-3" style={{ color: 'var(--text-primary)' }}>Color Theme</p>
-          <div className="flex gap-3">
-            {themeOptions.map(opt => (
-              <button key={opt.id}
-                onClick={() => { if (theme !== opt.id) toggleTheme(); }}
-                className="flex-1 flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all"
+          <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', display: 'block', marginBottom: 12 }}>Color Theme</label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {[{ id: 'dark', label: 'Dark Mode', icon: Moon }, { id: 'light', label: 'Light Mode', icon: Sun }].map(opt => (
+              <button key={opt.id} onClick={() => { if (theme !== opt.id) toggleTheme(); }}
                 style={{
-                  background: theme === opt.id ? 'var(--accent)' : 'var(--bg-primary)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 12,
+                  borderRadius: 'var(--radius-md)', background: theme === opt.id ? 'var(--accent)' : 'var(--bg-input)',
                   color: theme === opt.id ? 'white' : 'var(--text-secondary)',
                   border: `1px solid ${theme === opt.id ? 'var(--accent)' : 'var(--border)'}`,
+                  fontSize: 13, fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s'
                 }}>
-                <opt.icon size={16} />
-                {opt.label}
-                {theme === opt.id && <Check size={14} />}
+                <opt.icon size={16} /> {opt.label} {theme === opt.id && <Check size={14} />}
               </button>
             ))}
           </div>
         </div>
-
-        <ToggleRow
-          label="Dark Charts"
-          desc="Use dark background for chart visualizations"
-          value={darkCharts}
-          onChange={setDarkCharts}
-        />
       </Section>
 
-      {/* Notifications */}
-      <Section title="Notifications" icon={Bell} delay={0.1}>
-        <ToggleRow
-          label="Toast Notifications"
-          desc="Show pop-up notifications for workflow events"
-          value={notifications}
-          onChange={setNotifications}
-        />
-        <ToggleRow
-          label="Auto-save"
-          desc="Automatically save analysis results as they complete"
-          value={autoSave}
-          onChange={setAutoSave}
-        />
-      </Section>
-
-      {/* API Configuration */}
-      <Section title="AI Configuration" icon={Key} delay={0.15}>
+      {/* Configuration */}
+      <Section title="AI Configuration" icon={Key} delay={0.1}>
         <div>
-          <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-            OpenAI API Key
-          </label>
-          <div className="relative">
-            <input
-              type={apiKeyVisible ? 'text' : 'password'}
-              value={apiKey}
-              onChange={e => setApiKey(e.target.value)}
+          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>OpenAI API Key</label>
+          <div style={{ position: 'relative' }}>
+            <input type={apiKeyVisible ? 'text' : 'password'} value={apiKey} onChange={e => setApiKey(e.target.value)}
               placeholder="sk-..."
-              className="w-full p-2.5 pr-10 rounded-xl text-sm font-mono"
-              style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
-            />
-            <button
-              onClick={() => setApiKeyVisible(p => !p)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs"
-              style={{ color: 'var(--text-muted)' }}>
+              style={{
+                width: '100%', padding: '10px 14px', paddingRight: 60, borderRadius: 'var(--radius-md)',
+                background: 'var(--bg-input)', border: '1px solid var(--border)', color: 'var(--text-primary)',
+                fontFamily: 'monospace', fontSize: 13
+              }} />
+            <button onClick={() => setApiKeyVisible(!apiKeyVisible)} style={{
+              position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+              background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer'
+            }}>
               {apiKeyVisible ? 'Hide' : 'Show'}
             </button>
           </div>
-          <p className="text-xs mt-1.5 flex items-start gap-1.5" style={{ color: 'var(--text-muted)' }}>
-            <Info size={11} className="mt-0.5 flex-shrink-0" />
-            Configure in <code className="font-mono px-1 rounded" style={{ background: 'var(--bg-card)' }}>backend/.env</code> for production use
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Info size={12} /> Configure in backend/.env for persistent production use
           </p>
         </div>
 
         <div>
-          <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-            AI Model
-          </label>
-          <select
-            className="w-full p-2.5 rounded-xl text-sm"
-            style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
-            <option value="gpt-4o">GPT-4o (Recommended)</option>
-            <option value="gpt-4o-mini">GPT-4o Mini (Faster)</option>
+          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI Engine Model</label>
+          <select style={{
+            width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', background: 'var(--bg-input)',
+            border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: 13, appearance: 'none'
+          }}>
+            <option value="gpt-4o">GPT-4o (Recommended - Best Logic)</option>
+            <option value="gpt-4o-mini">GPT-4o Mini (Fastest)</option>
             <option value="gpt-4-turbo">GPT-4 Turbo</option>
-            <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Economy)</option>
           </select>
         </div>
       </Section>
 
+      {/* Notifications */}
+      <Section title="Preferences" icon={Bell} delay={0.15}>
+        <ToggleRow label="Toast Notifications" desc="Show pop-up notifications for workflow events" value={notifications} onChange={setNotifications} />
+        <ToggleRow label="Auto-save Analyses" desc="Automatically save analysis results as they complete" value={autoSave} onChange={setAutoSave} />
+      </Section>
+
       {/* Platform Info */}
-      <Section title="Platform" icon={Brain} delay={0.2}>
-        <div className="grid grid-cols-2 gap-3">
+      <Section title="System Status" icon={Cpu} delay={0.2}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           {[
-            { label: 'Version', value: '1.0.0' },
+            { label: 'Version', value: '1.0.0 (Beta)' },
             { label: 'Backend', value: 'FastAPI 0.104+' },
-            { label: 'AI Engine', value: 'OpenAI GPT-4' },
-            { label: 'Database', value: 'SQLite / PostgreSQL' },
+            { label: 'Database', value: 'SQLite / PostgreSQL Ready' },
+            { label: 'UI Framework', value: 'Next.js 15 App Router' },
           ].map((item, i) => (
-            <div key={i} className="rounded-xl p-3" style={{ background: 'var(--bg-primary)' }}>
-              <p className="text-[11px] mb-0.5" style={{ color: 'var(--text-muted)' }}>{item.label}</p>
-              <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{item.value}</p>
+            <div key={i} style={{ padding: 12, borderRadius: 'var(--radius-md)', background: 'var(--bg-input)' }}>
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>{item.label}</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{item.value}</p>
             </div>
           ))}
         </div>
-
-        <div className="p-4 rounded-xl" style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)' }}>
-          <p className="text-xs font-medium mb-2" style={{ color: 'var(--accent)' }}>
-            <Sparkles size={12} className="inline mr-1" /> AI Agents Status
+        <div style={{ padding: 16, borderRadius: 'var(--radius-md)', background: 'var(--success-subtle)', border: '1px solid rgba(34,197,94,0.2)' }}>
+          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--success)', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+            <Check size={14} /> All 6 AI Agents Online
           </p>
-          <div className="space-y-1.5">
-            {['Manager Agent', 'Audit Agent', 'Cleaning Agent', 'EDA Agent', 'Visualization Agent', 'Insight Agent'].map((a, i) => (
-              <div key={i} className="flex items-center justify-between">
-                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{a}</span>
-                <span className="flex items-center gap-1 text-xs" style={{ color: '#10b981' }}>
-                  <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: '#10b981' }} />
-                  Ready
-                </span>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {['Manager', 'Audit', 'Cleaning', 'EDA', 'Visualization', 'Insight'].map(a => (
+              <div key={a} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-secondary)' }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--success)' }} /> {a} Agent
               </div>
             ))}
           </div>
         </div>
       </Section>
 
-      {/* Save button */}
-      <motion.div {...fadeUp(0.25)} className="flex justify-end">
-        <button onClick={handleSave} className="btn-primary"
-          style={saved ? { background: '#10b981' } : {}}>
-          {saved ? <><Check size={15} /> Saved!</> : <><Settings size={15} /> Save Settings</>}
+      {/* Save Button */}
+      <motion.div {...fadeUp(0.25)} style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: 16 }}>
+        <button onClick={handleSave} className="btn-primary" style={{ background: saved ? 'var(--success)' : 'var(--gradient-brand)' }}>
+          {saved ? <><Check size={16} /> Saved Successfully!</> : <><Settings size={16} /> Save Settings</>}
         </button>
       </motion.div>
     </div>
